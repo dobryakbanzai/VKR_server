@@ -27,5 +27,9 @@ public partial class Student
 
     public int? TasksProg { get; set; }
 
+    public virtual ICollection<ChallangeStudent> ChallangeStudents { get; } = new List<ChallangeStudent>();
+
+    public virtual ICollection<StudentAnswerCheck> StudentAnswerChecks { get; } = new List<StudentAnswerCheck>();
+
     public virtual Teacher? Teacher { get; set; }
 }

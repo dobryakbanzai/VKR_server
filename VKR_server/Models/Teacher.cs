@@ -20,4 +20,6 @@ public partial class Teacher
     public string? PersonRole { get; set; }
 
     public virtual ICollection<Student> Students { get; } = new List<Student>();
+
+    public virtual ICollection<TasksPack> TasksPacks { get; } = new List<TasksPack>();
 }

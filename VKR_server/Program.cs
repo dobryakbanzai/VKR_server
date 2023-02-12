@@ -108,6 +108,6 @@ app.UseEndpoints(endpoints =>
 app.MapControllers();
 
 string Host = System.Net.Dns.GetHostName();
-string IP = System.Net.Dns.GetHostByName(Host).AddressList[3].ToString();
+string IP = System.Net.Dns.GetHostByName(Host).AddressList[4].ToString();
 
 app.Run("http://" + IP + ":8080/");
