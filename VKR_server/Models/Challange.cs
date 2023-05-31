@@ -9,11 +9,10 @@ public partial class Challange
 
     public string ChallangeName { get; set; } = null!;
 
-    public Guid ChallangeType { get; set; }
+    public string ChallangeType { get; set; }
 
     public int ChallangeTarget { get; set; }
 
     public virtual ICollection<ChallangeStudent> ChallangeStudents { get; } = new List<ChallangeStudent>();
-
-    public virtual ChallangeType ChallangeTypeNavigation { get; set; } = null!;
+   
 }

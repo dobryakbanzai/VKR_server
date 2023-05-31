@@ -56,16 +56,15 @@ public partial class PostgresContext : DbContext
             entity.Property(e => e.Id)
                 .ValueGeneratedNever()
                 .HasColumnName("id");
+
             entity.Property(e => e.ChallangeName)
                 .HasColumnType("character varying")
                 .HasColumnName("challange_name");
+            
             entity.Property(e => e.ChallangeTarget).HasColumnName("challange_target");
-            entity.Property(e => e.ChallangeType).HasColumnName("challange_type");
+            
+            entity.Property(e => e.ChallangeType).HasColumnType("character varying").HasColumnName("challange_type");
 
-            entity.HasOne(d => d.ChallangeTypeNavigation).WithMany(p => p.Challanges)
-                .HasForeignKey(d => d.ChallangeType)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("header_ch_type_fk");
         });
 
         modelBuilder.Entity<ChallangeStudent>(entity =>
@@ -79,7 +78,7 @@ public partial class PostgresContext : DbContext
                 .HasColumnName("id");
             entity.Property(e => e.ChallangeId).HasColumnName("challange_id");
             entity.Property(e => e.StudentId).HasColumnName("student_id");
-
+            /*
             entity.HasOne(d => d.Challange).WithMany(p => p.ChallangeStudents)
                 .HasForeignKey(d => d.ChallangeId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
@@ -88,7 +87,7 @@ public partial class PostgresContext : DbContext
             entity.HasOne(d => d.Student).WithMany(p => p.ChallangeStudents)
                 .HasForeignKey(d => d.StudentId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("stud_id_fk");
+                .HasConstraintName("stud_id_fk");*/
         });
 
         modelBuilder.Entity<ChallangeType>(entity =>
@@ -100,6 +99,7 @@ public partial class PostgresContext : DbContext
             entity.Property(e => e.Id)
                 .ValueGeneratedNever()
                 .HasColumnName("id");
+
             entity.Property(e => e.TypeName)
                 .HasColumnType("character varying")
                 .HasColumnName("type_name");

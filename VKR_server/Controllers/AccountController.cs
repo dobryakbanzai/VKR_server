@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Cors;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -6,6 +7,8 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.Drawing;
 using System.IdentityModel.Tokens.Jwt;
+using System.IO;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Security.Claims;
 using System.Text;
@@ -33,8 +36,8 @@ namespace VKR_server.Controllers
         private readonly JWTSettings _options;
         private readonly PostgresContext _context;
 
-        //"login":"124","pass":"12634"
-       
+        //"login":"qwerty","pass":"qwerty"
+
         public AccountController(IOptions<JWTSettings> optAccess, PostgresContext context)
         {
             _options = optAccess.Value;
@@ -44,57 +47,32 @@ namespace VKR_server.Controllers
         [HttpGet("GetToken")]
         public async Task<string> GetTokenAsync() 
         {
-            var students = await _context.Students.ToListAsync();
+            var res = "";
 
-            List<Claim> claims = new List<Claim>();
-
-            foreach (var item in students)
+            using (StreamReader reader = new StreamReader("C:\\Users\\lalal\\OneDrive\\Desktop\\Diplom\\ServerASP\\VKR_server\\VKR_server\\open_key.txt"))
             {
-                if(item.Login == "124")
-                {
-                    var id = "id";
-                    var pr = "personrole";
+                string text = await reader.ReadToEndAsync();
 
-                    claims.Add(new Claim(id, item.Id.ToString()));
-                    claims.Add(new Claim(pr, item.PersonRole));
-                }
+                res += text;
+
             }
-            /*List<Claim> claims = new List<Claim>();
-            claims.Add(new Claim(ClaimTypes.Name, "Nataly"));
-            claims.Add(new Claim("level", "123"));
-            claims.Add(new Claim(ClaimTypes.Role, "Admin"));*/
 
-var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_options.SecretKey));
-
-            var jwt = new JwtSecurityToken(
-                issuer: _options.Issuer,
-                audience: _options.Audience,
-                claims: claims,
-                expires: DateTime.UtcNow.Add(TimeSpan.FromMinutes(1)),
-                notBefore: DateTime.UtcNow,
-                signingCredentials: new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256)
-
-
-                );
-
-            /*var token = new JwtSecurityTokenHandler().WriteToken(jwt);
-            var handler = new JwtSecurityTokenHandler();
-            var res = handler.ReadJwtToken(token).ToString();*/
-
-            return new JwtSecurityTokenHandler().WriteToken(jwt);
+            return res;
             //return IP;
         }
 
         [HttpPost("GetToken")]
         public async Task<ActionResult<string>> PostToken(LogPas logPas)
         {
+            
+            var decrLog = AsymmetricEncryptionUtility.DecryptData(AsymmetricEncryptionUtility.stringToByteArr(logPas.login), "C:\\Users\\lalal\\OneDrive\\Desktop\\Diplom\\ServerASP\\VKR_server\\VKR_server\\asymmetric_key.txt");
+            var decrPas = AsymmetricEncryptionUtility.DecryptData(AsymmetricEncryptionUtility.stringToByteArr(logPas.password), "C:\\Users\\lalal\\OneDrive\\Desktop\\Diplom\\ServerASP\\VKR_server\\VKR_server\\asymmetric_key.txt");
+
             var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_options.SecretKey));
 
             var students = await _context.Students.ToListAsync();
-            var student = await _context.Students.FirstOrDefaultAsync();
 
             var teachers = await _context.Teachers.ToListAsync();
-            var teacher = await _context.Teachers.FirstOrDefaultAsync();
 
             List<Claim> claims = new List<Claim>();
             
@@ -102,49 +80,42 @@ var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_options.Secret
             {
                 foreach (var item in students)
                 {
-                    if (item.Login == logPas.login)
+                    if (item.Login == decrLog)
                     {
-                        if (BCrypt.Net.BCrypt.Verify(logPas.password, item.Pass))
+                        if (BCrypt.Net.BCrypt.Verify(decrPas, item.Pass))
                         {
                             var id = "id";
                             var pr = "personrole";
 
                             claims.Add(new Claim(id, item.Id.ToString()));
                             claims.Add(new Claim(pr, item.PersonRole));
+
                         }
-                        else
-                        {
-                            return BadRequest();
-                        }
-
-
-
                     }
                 }
 
             }
-            else if(teachers != null)
+            if(teachers != null)
             {
                 foreach (var item in teachers)
                 {
-                    if (BCrypt.Net.BCrypt.Verify(logPas.password, item.Pass))
+                    if (item.Login == decrLog)
                     {
-                        var id = "id";
-                        var pr = "personrole";
+                        if (BCrypt.Net.BCrypt.Verify(decrPas, item.Pass))
+                        {
+                            var id = "id";
+                            var pr = "personrole";
 
-                        claims.Add(new Claim(id, item.Id.ToString()));
-                        claims.Add(new Claim(pr, item.PersonRole));
+                            claims.Add(new Claim(id, item.Id.ToString()));
+                            claims.Add(new Claim(pr, item.PersonRole));
 
-                    }
-                    else
-                    {
-                        return BadRequest();
+                        }
                     }
                 }
             }
             else
             {
-                return BadRequest();
+                return decrLog + " " + decrPas;
             }
 
             
@@ -159,5 +130,43 @@ var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_options.Secret
 
             return new JwtSecurityTokenHandler().WriteToken(jwt);
         }
+        [HttpGet("GetRSACrypted")]
+        public async Task<ActionResult<string>> rSACryptQwerty()
+        {
+            var res = "";
+            var log = "qwerty";
+            var pass = "qwerty";
+
+            using (StreamReader reader = new StreamReader("C:\\Users\\lalal\\OneDrive\\Desktop\\Diplom\\ServerASP\\VKR_server\\VKR_server\\open_key.txt"))
+            {
+                string text = await reader.ReadToEndAsync();
+
+                res += text;
+
+            }
+
+            var logEncr = AsymmetricEncryptionUtility.byteArrToString(AsymmetricEncryptionUtility.EncryptData(log, res));
+            var passEncr = AsymmetricEncryptionUtility.byteArrToString(AsymmetricEncryptionUtility.EncryptData(pass, res));
+
+            return "\"login\":\"" + logEncr + "\",\n\"password\":\"" + passEncr + "\"";
+        }
+
+        [Authorize]
+        [HttpGet("myrole")]
+        public async Task<ActionResult<string>> GetStudentRole()
+        {
+            var req = Request.Headers["Authorization"].ToString().Replace("Bearer ", string.Empty);
+
+            //var id = new JwtSecurityToken(req).Payload["id"].ToString();
+            var handler = new JwtSecurityTokenHandler();
+
+            string role = handler.ReadJwtToken(req).Payload["personrole"].ToString();
+
+            return role;
+        }
+
     }
+
+    
+
 }

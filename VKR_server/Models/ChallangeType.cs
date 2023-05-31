@@ -9,5 +9,4 @@ public partial class ChallangeType
 
     public string TypeName { get; set; } = null!;
 
-    public virtual ICollection<Challange> Challanges { get; } = new List<Challange>();
 }

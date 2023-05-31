@@ -18,6 +18,8 @@ using VKR_server.Models;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using System.Security.Cryptography;
+using VKR_server;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -51,7 +53,7 @@ builder.Services.AddAuthentication(opt =>
         ValidateAudience= true,
         ValidAudience= audience,
 
-        ValidateLifetime= true,
+        ValidateLifetime= false,
         IssuerSigningKey = signingKey,
 
         ValidateIssuerSigningKey= true,
@@ -104,10 +106,16 @@ app.UseEndpoints(endpoints =>
 });
 
 
+var PublicKeyText = AsymmetricEncryptionUtility.GenerateKey("C:\\Users\\lalal\\OneDrive\\Desktop\\Diplom\\ServerASP\\VKR_server\\VKR_server\\open_key.txt", "C:\\Users\\lalal\\OneDrive\\Desktop\\Diplom\\ServerASP\\VKR_server\\VKR_server\\asymmetric_key.txt");
+
+
+
 
 app.MapControllers();
 
 string Host = System.Net.Dns.GetHostName();
-string IP = System.Net.Dns.GetHostByName(Host).AddressList[4].ToString();
+string IP = System.Net.Dns.GetHostByName(Host).AddressList[3].ToString();
+
+Console.WriteLine("http://" + IP + ":8080/api/");
 
 app.Run("http://" + IP + ":8080/");

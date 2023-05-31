@@ -168,5 +168,37 @@ namespace VKR_server.Controllers
         {
             return _context.Teachers.Any(e => e.Id == id);
         }
+
+        [Authorize]
+        [HttpGet("me")]
+        public async Task<ActionResult<Teacher>> GetTeacherSelf()
+        {
+            var req = Request.Headers["Authorization"].ToString().Replace("Bearer ", string.Empty);
+
+            //var id = new JwtSecurityToken(req).Payload["id"].ToString();
+            var handler = new JwtSecurityTokenHandler();
+
+            Guid id = Guid.Parse(input: handler.ReadJwtToken(req)
+                                               .Payload["id"]
+                                               .ToString());
+
+            var teacher = await _context.Teachers.FindAsync(id);
+
+            if (teacher == null)
+            {
+                return NotFound();
+            }
+
+            var teach_new = new Teacher
+            {
+                Id = teacher.Id,
+                Firstname = teacher.Firstname,
+                Lastname = teacher.Lastname,
+                PersonRole = teacher.PersonRole,
+               
+            };
+
+            return teach_new;
+        }
     }
 }

@@ -35,6 +35,130 @@ namespace VKR_server.Controllers
         }
 
         [Authorize]
+        [HttpGet("addaryph")]
+        public async Task<ActionResult<string>> AddStudAryph()
+        {
+            var req = Request.Headers["Authorization"].ToString().Replace("Bearer ", string.Empty);
+            var handler = new JwtSecurityTokenHandler();
+
+            Guid id = Guid.Parse(input: handler.ReadJwtToken(req)
+                                               .Payload["id"]
+                                               .ToString());
+
+            var student = await _context.Students.FindAsync(id);
+
+            student.AryProg += 1;
+
+            _context.Entry(student).State = EntityState.Modified;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!StudentExists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return "";
+        }
+
+        [Authorize]
+        [HttpGet("addder")]
+        public async Task<ActionResult<string>> AddStudDer()
+        {
+            var req = Request.Headers["Authorization"].ToString().Replace("Bearer ", string.Empty);
+            var handler = new JwtSecurityTokenHandler();
+
+            Guid id = Guid.Parse(input: handler.ReadJwtToken(req)
+                                               .Payload["id"]
+                                               .ToString());
+
+            var student = await _context.Students.FindAsync(id);
+
+            student.DerProg += 1;
+
+            _context.Entry(student).State = EntityState.Modified;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!StudentExists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return "";
+        }
+
+        [Authorize]
+        [HttpGet("addtask")]
+        public async Task<ActionResult<string>> AddStudTask()
+        {
+            var req = Request.Headers["Authorization"].ToString().Replace("Bearer ", string.Empty);
+            var handler = new JwtSecurityTokenHandler();
+
+            Guid id = Guid.Parse(input: handler.ReadJwtToken(req)
+                                               .Payload["id"]
+                                               .ToString());
+
+            var student = await _context.Students.FindAsync(id);
+
+            student.TasksProg += 1;
+
+            _context.Entry(student).State = EntityState.Modified;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!StudentExists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return "";
+        }
+
+        [Authorize]
+        [HttpGet("MyID")]
+        public async Task<ActionResult<Guid>> GetStudentID()
+        {
+            var req = Request.Headers["Authorization"].ToString().Replace("Bearer ", string.Empty);
+
+            //var id = new JwtSecurityToken(req).Payload["id"].ToString();
+            var handler = new JwtSecurityTokenHandler();
+
+            Guid id = Guid.Parse(input: handler.ReadJwtToken(req)
+                                               .Payload["id"]
+                                               .ToString());
+
+            return id;
+        }
+
+        [Authorize]
         [HttpGet("Myself")]
         public async Task<ActionResult<Student>> GetStudentSelf()
         {
@@ -43,7 +167,9 @@ namespace VKR_server.Controllers
             //var id = new JwtSecurityToken(req).Payload["id"].ToString();
             var handler = new JwtSecurityTokenHandler();
 
-            Guid id = Guid.Parse(handler.ReadJwtToken(req).Payload["id"].ToString());
+            Guid id = Guid.Parse(input: handler.ReadJwtToken(req)
+                                               .Payload["id"]
+                                               .ToString());
 
             var student = await _context.Students.FindAsync(id);
 
@@ -138,7 +264,6 @@ namespace VKR_server.Controllers
             
             try
             {
-                
                 await _context.SaveChangesAsync();
             }
             catch (DbUpdateException)
